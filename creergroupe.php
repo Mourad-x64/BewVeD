@@ -1,4 +1,52 @@
+<?php
+//Connexion à la base MySQL via PDO
+require_once '_connec.php';
 
+$pdo = new \PDO(DSN, USER, PASS);
+
+//Récupération de la promotion
+$query = "SELECT st.firstname, st.lastname, st.age, s.name as session, g.name as gender
+   FROM student as st
+   INNER JOIN session as s ON s.id=st.session_id
+   INNER JOIN gender as g ON g.id=st.gender_id
+   ORDER BY gender ASC";
+$statement = $pdo->query($query);
+$studentList = $statement->fetchAll(PDO::FETCH_ASSOC);
+
+$nbStudentsByGroup = 3;
+
+function distribute($studentList, $nbStudentsByGroup) {
+   $nbGroups = intdiv( count($studentList), $nbStudentsByGroup );
+   if (
+      (count($studentList) % $nbStudentsByGroup == ($nbStudentsByGroup - 2)) && (($nbStudentsByGroup - 2) > 1)
+      || (count($studentList) % $nbStudentsByGroup == ($nbStudentsByGroup - 1)) && (($nbStudentsByGroup - 2) > 1)
+      ) {
+      $nbGroups = $nbGroups + 1;
+   } //Permet de répartir des cas particuliers comme 25 en groupes de 9  ou 11 en groupes de 4
+
+   //Génération des sous-groupes
+   $groupList = [];
+   for ($i = 0 ; $i < $nbGroups ; $i++) {
+      $groupList[$i] = ["Groupe n° " . ($i + 1)];
+   }
+
+   //Répartition des apprenants dans les sous-groupes
+   for ($i = 0; $i < count($studentList) ; $i++) {
+      $j = $i ;
+      while ($j > ($nbGroups - 1)) {
+         $j = $j - $nbGroups;
+      }
+      array_push($groupList[$j],$studentList[$i]);
+   }
+
+   return array($groupList, $nbGroups);
+}
+
+$distribution = distribute($studentList, $nbStudentsByGroup);
+
+// var_dump($distribution); die;
+
+?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -48,7 +96,7 @@
                      <div class="full">
                         <div class="center-desk">
                            <div class="logo">
-                              <a href="index.html"><img src="images/logo.png" alt="#" /></a>
+                              <a href="index.php"><img src="images/logo.png" alt="#" /></a>
                            </div>
                         </div>
                      </div>
@@ -61,10 +109,10 @@
                         <div class="collapse navbar-collapse" id="navbarsExample04">
                            <ul class="navbar-nav mr-auto">
                               <li class="nav-item">
-                                 <a class="nav-link" href="creergroupe.html">Créer groupes </a>
+                                 <a class="nav-link" href="creergroupe.php">Créer groupes</a>
                               </li>
                               <li class="nav-item">
-                                 <a class="nav-link" href="index.html">Ajouter Apprenant</a>
+                                 <a class="nav-link" href="index.php">Ajouter Apprenant</a>
                               </li>
                               <li class="nav-item">
                                  <a class="nav-link" href="#">Contact</a>
@@ -88,51 +136,26 @@
             <div class="row">
                <div class="col-md-12">
                   <div class="titlepage">
-                     <h2> <strong class="yellow">Répartion des groupes  </strong>  Developpeur PHP/Symfony</h2>
+                     <h2><strong class="yellow">Session </strong><?= $studentList[0]['session']; ?> <strong class="yellow"> - Répartion en groupes</strong></h2>
                   </div>
                </div>
             </div>
             <div class="row">
-               <div class="col-md-4">
-                  <div id="white_bg" class="works_box">
-                     <h4>01</h4>
-                     <p>There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look even slightly believable</p>
+               <?php for ($i = 0 ; $i < $distribution[1] ; $i++) : ?>
+                  <div class="col-md-4">
+                     <div id="white_bg" class="works_box">
+                        <h4><?php echo $i + 1; ?></h4>
+                        <p>
+                           <?php
+                              for ($j = 0 ; $j < (count($distribution[0][$i]) -1 ) ; $j++) {
+                                 echo $distribution[0][$i][$j + 1]['firstname'] . " " . $distribution[0][$i][$j + 1]['lastname'] . " " . $distribution[0][$i][$j + 1]['age'] . " " . $distribution[0][$i][$j + 1]['gender'];
+                                 echo "</br>";
+                             }
+                           ?>
+                        </p>
+                     </div>
                   </div>
-               </div>
-               <div class="col-md-4">
-                  <div id="white_bg" class="works_box ">
-                     <h4>02</h4>
-                     <p>There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look even slightly believable</p>
-                  </div>
-               </div>
-               <div class="col-md-4">
-                  <div id="white_bg" class="works_box">
-                     <h4>03</h4>
-                     <p>There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look even slightly believable</p>
-                  </div>
-
-               </div>
-            </div>
-            <div class="row">
-               <div class="col-md-4">
-                  <div id="white_bg" class="works_box">
-                     <h4>04</h4>
-                     <p>There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look even slightly believable</p>
-                  </div>
-               </div>
-               <div class="col-md-4">
-                  <div id="white_bg" class="works_box ">
-                     <h4>05</h4>
-                     <p>There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look even slightly believable</p>
-                  </div>
-               </div>
-               <div class="col-md-4">
-                  <div id="white_bg" class="works_box">
-                     <h4>06</h4>
-                     <p>There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look even slightly believable</p>
-                  </div>
-                  
-               </div>
+               <?php endfor; ?>
             </div>
          </div>
       </div>
