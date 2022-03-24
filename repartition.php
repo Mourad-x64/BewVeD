@@ -14,7 +14,6 @@ $query = "SELECT * FROM session";
 $statement = $pdo->query($query);
 $sessions = $statement->fetchAll(PDO::FETCH_ASSOC);
 
-var_dump($_GET);
 
 ?>
 
@@ -24,6 +23,7 @@ var_dump($_GET);
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <title>Formulaire de répartition</title>
 </head>
   <body>
@@ -37,26 +37,7 @@ var_dump($_GET);
                     <?php endforeach; ?>
             </select>
         </div>
-        <!-- <fieldset>
-            <legend>Sélectionnez le critère de répartition</legend>
-            <div>
-                <label for="gender">Genre :</label>
-                <input type="checkbox" checked id="gender" name="gender_name">
-            </div>
-            <div>
-                <label for="age">Âge :</label>
-                <input type="checkbox" checked id="age" name="age">
-            </div>
-            <div>
-                <label for="skill">Compétence :</label>
-                <input type="checkbox" checked id="skill" name="skill_name">
-                <select>
-                    <?php foreach ($skills as $skill) : ?>
-                        <option><?= $skill['name']; ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-        </fieldset> -->
+        
         <fieldset>
             <legend>Sélectionnez le critère de répartition</legend>
             <div>
@@ -67,9 +48,9 @@ var_dump($_GET);
                     <option value="skill">Compétence</option>
                 </select>
             </div>
-            <div class="skillSelector" hidden>
-                <label for="skill">Compétence :</label>
-                <select name="skill" id="skill-select" disabled>
+            <div class="skillSelector" id="skill-select" >
+            <label for="skill">Compétence :</label>
+                <select name="skill" >
                     <?php foreach ($skills as $skill) : ?>
                         <option value="<?= $skill['id']; ?>"><?= $skill['name']; ?></option>
                     <?php endforeach; ?>
@@ -81,15 +62,21 @@ var_dump($_GET);
         </div>
     </form>
 
-    <script>
-        const criteriaSelector = document.querySelector('#criteria-select');
+    <script>     
 
-        criteriaSelector.addEventListener('change', () => {
-            console.log(criteriaSelector.value === 'skill')
-            if (criteriaSelector.value === 'skill') {
-                document.querySelector('.skillSelector').display("block")
-            }
+        $(document).ready(function(){
+            $("#criteria-select").change(function(){
+                $(this).find("option:selected").each(function(){
+                    var optionValue = $(this).attr("value");
+                    if(optionValue == "skill"){                        
+                        $("#skill-select").show();
+                    } else{
+                        $("#skill-select").hide();                        
+                    }
+                });
+            }).change();
         });
+
     </script>
   </body>
 </html>
