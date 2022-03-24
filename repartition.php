@@ -14,7 +14,7 @@ $query = "SELECT * FROM session";
 $statement = $pdo->query($query);
 $sessions = $statement->fetchAll(PDO::FETCH_ASSOC);
 
-
+var_dump($_GET);
 ?>
 
 <!DOCTYPE html>
@@ -29,15 +29,24 @@ $sessions = $statement->fetchAll(PDO::FETCH_ASSOC);
   <body>
     <h1>Répartition en groupes de travail</h1>
     <form action="" method="get">
-        <div>
-            <label for="session">Promotion :</label>
-            <select name="session" id="session-select">
-                    <?php foreach ($sessions as $session) : ?>
-                        <option value="<?= $session['id']; ?>"><?= $session['name']; ?></option>
-                    <?php endforeach; ?>
-            </select>
-        </div>
-        
+        <fieldset>
+            <legend>Sélectionnez la session de formation</legend>
+            <div>
+                <label for="session">Promotion :</label>
+                <select name="session" id="session-select">
+                        <?php foreach ($sessions as $session) : ?>
+                            <option value="<?= $session['id']; ?>"><?= $session['name']; ?></option>
+                        <?php endforeach; ?>
+                </select>
+            </div>
+        </fieldset>
+        <fieldset>
+            <legend>Indiquez le nombre d'apprenants par groupe</legend>
+            <div>
+                <label for="nbStudents">Nombre :</label>
+                <input id="nbStudents" type="number" name="nbStudentsByGroup">
+            </div>
+        </fieldset>
         <fieldset>
             <legend>Sélectionnez le critère de répartition</legend>
             <div>
