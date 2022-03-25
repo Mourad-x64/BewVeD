@@ -4,16 +4,49 @@ require_once '_connec.php';
 
 $pdo = new \PDO(DSN, USER, PASS);
 
+// $_GET['session'];
+// $_GET['criteria'];
+// $_GET['skill'];
+
+//Récupération de la liste de compétences
+$query = "SELECT * FROM skill";
+$statement = $pdo->query($query);
+$skills = $statement->fetchAll(PDO::FETCH_ASSOC);
+
+//Récupération de la liste des promotions
+$query = "SELECT * FROM session";
+$statement = $pdo->query($query);
+$sessions = $statement->fetchAll(PDO::FETCH_ASSOC);
+
+// //Récupération des données du formulaire
+// $$nbStudentsByGroup = $_POST['nbStudentsByGroup'];
+// $session = $_POST['session'];
+// $$criteria = $_POST['criteria'];
+// $$skill = $_POST['skill'];
+
+// $query = 'INSERT INTO friend (firstname, lastname) VALUES (:firstname, :lastname)';
+// $statement = $pdo->prepare($query);
+
+// $statement->bindValue(':firstname', $firstname, \PDO::PARAM_STR);
+// $statement->bindValue(':lastname', $lastname, \PDO::PARAM_STR);
+
+// $statement->execute();
+
+// $friends = $statement->fetchAll();
+
 //Récupération de la promotion
-$query = "SELECT st.firstname, st.lastname, st.age, s.name as session, g.name as gender
+$query = "SELECT st.firstname, st.lastname, st.age, s.name as session, g.name as gender, GROUP_CONCAT(sk.name) as skill
    FROM student as st
    INNER JOIN session as s ON s.id=st.session_id
    INNER JOIN gender as g ON g.id=st.gender_id
+   INNER JOIN has_skill as hs ON st.id=hs.student_id
+   INNER JOIN skill as sk ON sk.id=hs.skill_id
+   GROUP BY st.firstname, st.lastname, st.age, session, gender
    ORDER BY gender ASC";
 $statement = $pdo->query($query);
 $studentList = $statement->fetchAll(PDO::FETCH_ASSOC);
 
-$nbStudentsByGroup = 3;
+$nbStudentsByGroup = 4;
 
 function distribute($studentList, $nbStudentsByGroup) {
    $nbGroups = intdiv( count($studentList), $nbStudentsByGroup );
@@ -44,7 +77,7 @@ function distribute($studentList, $nbStudentsByGroup) {
 
 $distribution = distribute($studentList, $nbStudentsByGroup);
 
-// var_dump($distribution); die;
+// var_dump($studentList); die;
 
 ?>
 
@@ -87,45 +120,7 @@ $distribution = distribute($studentList, $nbStudentsByGroup);
       </div>
       <!-- end loader -->
       <!-- header -->
-      <header>
-         <!-- header inner -->
-         <div class="header">
-            <div class="container">
-               <div class="row">
-                  <div class="col-xl-3 col-lg-3 col-md-3 col-sm-3 col logo_section">
-                     <div class="full">
-                        <div class="center-desk">
-                           <div class="logo">
-                              <a href="index.php"><img src="images/logo.png" alt="#" /></a>
-                           </div>
-                        </div>
-                     </div>
-                  </div>
-                  <div class="col-xl-9 col-lg-9 col-md-9 col-sm-9">
-                     <nav class="navigation navbar navbar-expand-md navbar-dark ">
-                        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExample04" aria-controls="navbarsExample04" aria-expanded="false" aria-label="Toggle navigation">
-                        <span class="navbar-toggler-icon"></span>
-                        </button>
-                        <div class="collapse navbar-collapse" id="navbarsExample04">
-                           <ul class="navbar-nav mr-auto">
-                              <li class="nav-item">
-                                 <a class="nav-link" href="creergroupe.php">Créer groupes</a>
-                              </li>
-                              <li class="nav-item">
-                                 <a class="nav-link" href="index.php">Ajouter Apprenant</a>
-                              </li>
-                              <li class="nav-item">
-                                 <a class="nav-link" href="#">Contact</a>
-                              </li>
-                           </ul>
-                           
-                        </div>
-                     </nav>
-                  </div>
-               </div>
-            </div>
-         </div>
-      </header>
+      <?php include_once('header.php') ?>
       <!-- end header inner -->
       <!-- end header -->
      
@@ -139,6 +134,50 @@ $distribution = distribute($studentList, $nbStudentsByGroup);
                      <h2><strong class="yellow">Session </strong><?= $studentList[0]['session']; ?> <strong class="yellow"> - Répartion en groupes</strong></h2>
                   </div>
                </div>
+            </div>
+            <div class="row">
+               <form action="" method="get">
+                  <fieldset>
+                     <legend>Sélectionnez la session de formation</legend>
+                     <div>
+                        <label for="session">Promotion :</label>
+                        <select name="session" id="session-select">
+                           <?php foreach ($sessions as $session) : ?>
+                              <option value="<?= $session['id']; ?>"><?= $session['name']; ?></option>
+                           <?php endforeach; ?>
+                        </select>
+                     </div>
+                  </fieldset>
+                  <fieldset>
+                     <legend>Indiquez le nombre d'apprenants par groupe</legend>
+                     <div>
+                        <label for="nbStudents">Nombre :</label>
+                        <input id="nbStudents" type="number" name="nbStudentsByGroup">
+                     </div>
+                  </fieldset>
+                  <fieldset>
+                     <legend>Sélectionnez le critère de répartition</legend>
+                     <div>
+                        <label for="criteria">Répartition par :</label>
+                        <select name="criteria" id="criteria-select">
+                           <option value="age">Âge</option>
+                           <option value="gender">Genre</option>
+                           <option value="skill">Compétence</option>
+                        </select>
+                     </div>
+                     <div class="skillSelector" id="skill-select" >
+                        <label for="skill">Compétence :</label>
+                        <select name="skill" >
+                           <?php foreach ($skills as $skill) : ?>
+                                 <option value="<?= $skill['id']; ?>"><?= $skill['name']; ?></option>
+                           <?php endforeach; ?>
+                        </select>
+                     </div>
+                  </fieldset>
+                  <div class="button">
+                     <button type="submit">Répartir</button>
+                  </div>
+               </form>
             </div>
             <div class="row">
                <?php for ($i = 0 ; $i < $distribution[1] ; $i++) : ?>
@@ -162,20 +201,7 @@ $distribution = distribute($studentList, $nbStudentsByGroup);
       <!-- end works -->
       
       <!--  footer -->
-      <footer>
-         <div class="footer">
-            
-            <div class="copyright">
-               <div class="container">
-                  <div class="row">
-                     <div class="col-md-12">
-                        <p>Copyright 2022 All Right Reserved By <a href="https://html.design/"> Mourad, Julien, Abdoul</a></p>
-                     </div>
-                  </div>
-               </div>
-            </div>
-         </div>
-      </footer>
+      <?php include_once('footer.php') ?>
       <!-- end footer -->
       <!-- Javascript files-->
       <script src="js/jquery.min.js"></script>
@@ -186,6 +212,20 @@ $distribution = distribute($studentList, $nbStudentsByGroup);
       <script src="js/jquery.mCustomScrollbar.concat.min.js"></script>
       <script src="js/custom.js"></script>
       <script src="https:cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.min.js"></script>
+      <script>     
+        $(document).ready(function(){
+            $("#criteria-select").change(function(){
+                $(this).find("option:selected").each(function(){
+                    var optionValue = $(this).attr("value");
+                    if(optionValue == "skill"){                        
+                        $("#skill-select").show();
+                    } else{
+                        $("#skill-select").hide();                        
+                    }
+                });
+            }).change();
+        });
+      </script>
    </body>
 </html>
 
