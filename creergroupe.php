@@ -4,10 +4,6 @@ require_once '_connec.php';
 
 $pdo = new \PDO(DSN, USER, PASS);
 
-// $_GET['session'];
-// $_GET['criteria'];
-// $_GET['skill'];
-
 //Récupération de la liste de compétences
 $query = "SELECT * FROM skill";
 $statement = $pdo->query($query);
@@ -18,23 +14,7 @@ $query = "SELECT * FROM session";
 $statement = $pdo->query($query);
 $sessions = $statement->fetchAll(PDO::FETCH_ASSOC);
 
-// //Récupération des données du formulaire
-// $$nbStudentsByGroup = $_POST['nbStudentsByGroup'];
-// $session = $_POST['session'];
-// $$criteria = $_POST['criteria'];
-// $$skill = $_POST['skill'];
-
-// $query = 'INSERT INTO friend (firstname, lastname) VALUES (:firstname, :lastname)';
-// $statement = $pdo->prepare($query);
-
-// $statement->bindValue(':firstname', $firstname, \PDO::PARAM_STR);
-// $statement->bindValue(':lastname', $lastname, \PDO::PARAM_STR);
-
-// $statement->execute();
-
-// $friends = $statement->fetchAll();
-
-//Récupération de la promotion
+// Récupération de la promotion
 $query = "SELECT st.firstname, st.lastname, st.age, s.name as session, g.name as gender, GROUP_CONCAT(sk.name) as skill
    FROM student as st
    INNER JOIN session as s ON s.id=st.session_id
@@ -46,7 +26,7 @@ $query = "SELECT st.firstname, st.lastname, st.age, s.name as session, g.name as
 $statement = $pdo->query($query);
 $studentList = $statement->fetchAll(PDO::FETCH_ASSOC);
 
-$nbStudentsByGroup = 4;
+$nbStudentsByGroup = 5;
 
 function distribute($studentList, $nbStudentsByGroup) {
    $nbGroups = intdiv( count($studentList), $nbStudentsByGroup );
@@ -76,8 +56,6 @@ function distribute($studentList, $nbStudentsByGroup) {
 }
 
 $distribution = distribute($studentList, $nbStudentsByGroup);
-
-// var_dump($studentList); die;
 
 ?>
 
